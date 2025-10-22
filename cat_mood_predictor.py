@@ -1,7 +1,9 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
+from tensorflow.keras.preprocessing import image
 import matplotlib.pyplot as plt
 import os
+import numpy as np
 
 # Get the folder where this script lives
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -62,3 +64,23 @@ plt.show()
 # Save Model
 model.save("cat_mood_model.h5")
 print("Model saved! Now it knows when to ignore you.")
+
+# Path to the folder with your new test cat images
+test_folder = "submissions"
+
+# Define your mood categories (adjust to match your model’s training labels)
+moods = ["Curious", "Eepy", "Grumpy", "Happy", "Zoomies"]
+
+# Loop through images in submissions folder
+for img_name in os.listdir(test_folder):
+    if img_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+        img_path = os.path.join(test_folder, img_name)
+        img = image.load_img(img_path, target_size=(128, 128))  # adjust to your model input
+        x = image.img_to_array(img)
+        x = np.expand_dims(x, axis=0)
+        x = x / 255.0  # normalize
+
+        preds = model.predict(x)
+        predicted_mood = moods[np.argmax(preds)]
+
+        print(f"{img_name} → {predicted_mood}")
